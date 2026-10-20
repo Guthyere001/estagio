@@ -1,0 +1,9 @@
+/* inicio_usuario.css — carregar DEPOIS de base.css.
+   Contém apenas o que é específico da área do usuário. */
+
+.inline-style-1 { width: 44px; height: 44px; background: #2563eb; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.2rem; }
+.inline-style-2 { display: none; }
+.inline-style-3 { max-width: 280px; margin: 0 auto; }
+.inline-style-4 { text-align: center; }
+.inline-style-5 { text-align: center; vertical-align: middle; }
+.inline-style-6 { width: 40px; }

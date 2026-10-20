@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Tela inicial do Portal do Patrimônio">
+    <title>Portal do Patrimônio | Início</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="CSS/base.css">
+    <link rel="stylesheet" href="CSS/inicio.css">
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="container header-container">
+            <a href="#" class="brand" aria-label="Portal do Patrimônio">
+                <span class="brand-icon"><i class="fa-solid fa-landmark"></i></span>
+                <span>
+                    <strong>Portal do Patrimônio</strong>
+                    <small>Prefeitura Municipal de Tauá</small>
+                </span>
+            </a>
+
+            <nav class="main-nav" id="mainNav">
+                <a href="#inicio" class="active">Início</a>
+                <a href="#" id="btnRecursos">Recursos</a>
+                <a href="#" id="btnConsulta">Consulta</a>
+                <a href="login.html" class="nav-login" id="btnAcesso">
+                    <i class="fa-solid fa-right-to-bracket"></i> Acessar sistema
+                </a>
+            </nav>
+
+            <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero" id="inicio">
+            <div class="container hero-grid">
+                <div class="hero-content">
+                    <span class="eyebrow"><i class="fa-solid fa-shield-halved"></i> Gestão patrimonial</span>
+                    <h1>Controle, organização e transparência do patrimônio público.</h1>
+                    <p>
+                        Uma plataforma para consultar, acompanhar e organizar informações
+                        sobre bens, equipamentos e objetos do patrimônio municipal.
+                    </p>
+
+                    <div class="hero-actions">
+                        <a href="#consulta" class="btn-primary-custom" id="btnHeroConsulta">
+                            <i class="fa-solid fa-magnifying-glass"></i> Consultar patrimônio
+                        </a>
+                        <a href="#recursos" class="btn-secondary-custom" id="btnHeroRecursos">
+                            Conhecer recursos <i class="fa-solid fa-arrow-down"></i>
+                        </a>
+                    </div>
+
+                    <div class="hero-status">
+                        <span><i class="fa-solid fa-circle-check"></i> Sistema disponível</span>
+                        <span><i class="fa-solid fa-database"></i> Dados sincronizados (JS)</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <span>Portal do Patrimônio</span>
+            <span>Prefeitura Municipal de Tauá</span>
+            <span>&copy; <span id="ano"></span> — Sistema demonstrativo estático</span>
+        </div>
+    </footer>
+
+    <!-- Modal de Recursos -->
+    <div class="custom-modal" id="modalRecursos" aria-hidden="true">
+        <div class="modal-box modal-recursos">
+            <button class="modal-close" data-close-modal aria-label="Fechar">&times;</button>
+            <span class="modal-icon"><i class="fa-solid fa-layer-group"></i></span>
+            <h2>Recursos</h2>
+            <p>Acesse os principais recursos do Portal do Patrimônio.</p>
+            <div class="feature-grid">
+                <article class="feature-card">
+                    <span class="feature-icon"><i class="fa-solid fa-box-open"></i></span>
+                    <h3>Patrimônios</h3>
+                    <p>Visualize bens com tombo, sem tombo e objetos alocados.</p>
+                    <button type="button" class="link-button" id="btnConsultaRecurso">Consultar <i class="fa-solid fa-arrow-right"></i></button>
+                </article>
+                <article class="feature-card">
+                    <span class="feature-icon"><i class="fa-solid fa-chart-pie"></i></span>
+                    <h3>Estados dos objetos</h3>
+                    <p>Acompanhe itens em funcionamento, manutenção e outras situações.</p>
+                    <button type="button" class="link-button" id="btnEstatisticas">Ver estatísticas <i class="fa-solid fa-arrow-right"></i></button>
+                </article>
+                <article class="feature-card">
+                    <span class="feature-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+                    <h3>Pesquisa rápida</h3>
+                    <p>Encontre um patrimônio pelo nome, tombo ou localização.</p>
+                    <button type="button" class="link-button" id="btnPesquisaRecurso">Pesquisar <i class="fa-solid fa-arrow-right"></i></button>
+                </article>
+                <article class="feature-card">
+                    <span class="feature-icon"><i class="fa-solid fa-user-shield"></i></span>
+                    <h3>Acesso ao sistema</h3>
+                    <p>Entre com suas credenciais para gerenciar ou consultar o sistema.</p>
+                    <button type="button" class="link-button" id="btnAdmin">Entrar <i class="fa-solid fa-arrow-right"></i></button>
+                </article>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Consulta -->
+    <div class="custom-modal" id="modalConsulta" aria-hidden="true">
+        <div class="modal-box modal-consulta">
+            <button class="modal-close" data-close-modal aria-label="Fechar">&times;</button>
+            <span class="modal-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+            <h2>Consultar patrimônio</h2>
+            <p>Pesquise pelo nome, número de tombo ou localização.</p>
+
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input id="campoPesquisa" type="search" placeholder="Ex.: computador, 00125, secretaria..." autocomplete="off">
+                <button id="limparPesquisa" type="button">Limpar</button>
+            </div>
+
+            <div class="filter-tabs">
+                <button class="tab-btn active" data-filter="todos">Todos</button>
+                <button class="tab-btn" data-filter="com_tombo">Com Tombo</button>
+                <button class="tab-btn" data-filter="sem_tombo">Sem Tombo</button>
+                <button class="tab-btn" data-filter="alocado">Alocados</button>
+            </div>
+
+            <div class="table-responsive consulta-table">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Patrimônio</th>
+                            <th>Tombo</th>
+                            <th>Localização</th>
+                            <th>Tipo</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaPatrimonios"></tbody>
+                </table>
+            </div>
+
+            <div class="empty-state" id="semResultado" hidden>
+                <i class="fa-solid fa-folder-open"></i>
+                <strong>Nenhum registro encontrado.</strong>
+                <span>Tente outro termo de pesquisa.</span>
+            </div>
+
+            <div class="table-footer">
+                <span>Exibindo <strong id="totalVisivel">0</strong> registro(s)</span>
+                <span><i class="fa-solid fa-rotate"></i> Dados sincronizados (LocalStorage)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts de Conexão e Lógica -->
+    <script src="js/database.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Atualiza o ano no rodapé dinamicamente
+            document.getElementById('ano').textContent = new Date().getFullYear();
+
+            const menuToggle = document.getElementById('menuToggle');
+            const mainNav = document.getElementById('mainNav');
+            const modalRecursos = document.getElementById('modalRecursos');
+            const modalConsulta = document.getElementById('modalConsulta');
+
+            // Navegação e Modais
+            document.getElementById('btnAcesso')?.addEventListener('click', (e) => { e.preventDefault(); window.location.href = 'login.html'; });
+            document.getElementById('btnAdmin')?.addEventListener('click', () => { window.location.href = 'login.html'; });
+
+            document.getElementById('btnRecursos')?.addEventListener('click', (e) => { e.preventDefault(); abrirModal(modalRecursos); });
+            document.getElementById('btnHeroRecursos')?.addEventListener('click', (e) => { e.preventDefault(); abrirModal(modalRecursos); });
+            document.getElementById('btnConsulta')?.addEventListener('click', (e) => { e.preventDefault(); abrirModal(modalConsulta); carregarPatrimoniosIndex(); });
+            document.getElementById('btnHeroConsulta')?.addEventListener('click', (e) => { e.preventDefault(); abrirModal(modalConsulta); carregarPatrimoniosIndex(); });
+            document.getElementById('btnConsultaRecurso')?.addEventListener('click', () => { fecharModais(); abrirModal(modalConsulta); carregarPatrimoniosIndex(); });
+
+            menuToggle?.addEventListener('click', () => { mainNav?.classList.toggle('active'); });
+
+            document.querySelectorAll('[data-close-modal]').forEach(btn => {
+                btn.addEventListener('click', fecharModais);
+            });
+
+            window.addEventListener('click', (e) => {
+                if (e.target.classList.contains('custom-modal')) fecharModais();
+            });
+
+            // Filtros e Pesquisa no Modal
+            const campoPesquisa = document.getElementById('campoPesquisa');
+            const limparPesquisa = document.getElementById('limparPesquisa');
+            const tabBtns = document.querySelectorAll('.filter-tabs .tab-btn');
+            let filtroAtual = 'todos';
+
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    filtroAtual = btn.getAttribute('data-filter');
+                    carregarPatrimoniosIndex(campoPesquisa?.value || '', filtroAtual);
+                });
+            });
+
+            campoPesquisa?.addEventListener('input', () => {
+                carregarPatrimoniosIndex(campoPesquisa.value, filtroAtual);
+            });
+
+            limparPesquisa?.addEventListener('click', () => {
+                if (campoPesquisa) campoPesquisa.value = '';
+                carregarPatrimoniosIndex('', filtroAtual);
+            });
+        });
+
+        function abrirModal(modal) { if (modal) modal.classList.add('active'); }
+        function fecharModais() { document.querySelectorAll('.custom-modal').forEach(m => m.classList.remove('active')); }
+
+        function carregarPatrimoniosIndex(termo = '', filtro = 'todos') {
+            const tbody = document.getElementById('listaPatrimonios');
+            const semResultado = document.getElementById('semResultado');
+            const totalVisivel = document.getElementById('totalVisivel');
+
+            if (!tbody) return;
+
+            const db = Database.getDB();
+            let objetos = db.objetos || [];
+
+            // Aplica filtro por tipo
+            if (filtro !== 'todos') {
+                objetos = objetos.filter(o => o.tipo === filtro);
+            }
+
+            // Aplica filtro por termo de busca
+            if (termo.trim() !== '') {
+                const q = termo.toLowerCase();
+                objetos = objetos.filter(o => 
+                    (o.nome && o.nome.toLowerCase().includes(q)) ||
+                    (o.numero_tombo && o.numero_tombo.toLowerCase().includes(q)) ||
+                    (o.local && o.local.toLowerCase().includes(q)) ||
+                    (o.alocado_para && o.alocado_para.toLowerCase().includes(q))
+                );
+            }
+
+            tbody.innerHTML = '';
+            if (objetos.length > 0) {
+                semResultado.hidden = true;
+                objetos.forEach(item => {
+                    const tr = document.createElement('tr');
+                    const tipoFormatado = item.tipo === 'com_tombo' ? 'Com Tombo' : (item.tipo === 'sem_tombo' ? 'Sem Tombo' : 'Alocado');
+                    tr.innerHTML = `
+                        <td><strong>${item.nome}</strong></td>
+                        <td><span class="badge bg-secondary">${item.numero_tombo || item.alocado_para || 'N/A'}</span></td>
+                        <td>${item.local}</td>
+                        <td><span class="badge bg-info text-dark">${tipoFormatado}</span></td>
+                        <td><span class="badge bg-success">${item.estado}</span></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                totalVisivel.textContent = objetos.length;
+            } else {
+                semResultado.hidden = false;
+                totalVisivel.textContent = '0';
+            }
+        }
+    </script>
+</body>
+</html>

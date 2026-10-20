@@ -1,0 +1,77 @@
+/* base.css — estilos compartilhados entre inicio_adm.php e inicio_usuario.php
+   (extraído para eliminar ~260 linhas duplicadas entre os dois arquivos originais) */
+
+:root {
+    --primary-blue: #0d47a1;
+    --secondary-blue: #1976d2;
+    --bg-light: #f8fafc;
+    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-light);
+    color: #334155;
+}
+
+header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: #ffffff;
+    border-bottom: 4px solid var(--secondary-blue);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 0;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.logo-box { display: flex; align-items: center; gap: 1rem; }
+.logo-text h1 { font-size: 1.35rem; font-weight: 700; margin: 0; }
+.logo-text small { color: #94a3b8; font-size: 0.825rem; text-transform: uppercase; }
+
+nav { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+nav a { color: #ffffff; text-decoration: none; margin-left: 1.25rem; font-size: 0.9rem; font-weight: 500; transition: all 0.2s ease; cursor: pointer; }
+nav a:hover { color: #93c5fd !important; }
+nav a.active { color: #ffffff !important; font-weight: 600; }
+nav a.nav-sair { color: #ef4444 !important; }
+nav a.nav-sair:hover { color: #dc2626 !important; }
+
+.CENTRO { background: linear-gradient(135deg, #1e3a8a 0%, #0d47a1 100%); color: white; padding: 3.5rem 0; text-align: center; }
+.CENTRO h2 { font-weight: 800; font-size: 2.2rem; margin-bottom: 0.75rem; }
+.CENTRO p { color: #93c5fd; max-width: 600px; margin: 0 auto 2rem auto; }
+
+.search-box { max-width: 650px; margin: 0 auto; display: flex; gap: 0.5rem; background: white; padding: 6px; border-radius: 14px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); }
+.search-box input { border: none; outline: none; padding: 0.75rem 1.25rem; width: 100%; border-radius: 10px; color: #1e293b; }
+.search-box button { background: #2563eb; color: white; border: none; padding: 0.75rem 1.75rem; border-radius: 10px; font-weight: 600; }
+
+.section-header { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 2.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+
+.tab-btn { border: 1px solid #cbd5e1; background: white; color: #64748b; padding: 0.45rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+.tab-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
+
+.tabela-container { background: white; border-radius: 16px; box-shadow: var(--card-shadow); border: 1px solid #e2e8f0; overflow: hidden; margin-bottom: 3rem; }
+
+.table { width: 100%; margin-bottom: 0; }
+.table thead { background-color: #f1f5f9; }
+.table th { color: #475569; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; padding: 1rem 1.25rem; text-align: center; vertical-align: middle; }
+.table th.alinhado-esquerda { text-align: left; }
+.table td { padding: 1rem 1.25rem; vertical-align: middle; text-align: center; }
+.table td.alinhado-esquerda { text-align: left; }
+
+.link-produto { color: #0f172a; font-weight: 700; text-decoration: none; transition: color 0.2s; cursor: pointer; }
+.link-produto:hover { color: #2563eb; text-decoration: underline; }
+
+.tombo-badge { background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 0.25rem 0.6rem; border-radius: 6px; font-family: monospace; font-weight: 600; font-size: 0.8rem; }
+
+.status-badge { padding: 0.35rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 600; display: inline-block; background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
+.status-manutencao { background-color: #fef3c7; color: #92400e; border-color: #fde68a; }
+.status-inservivel { background-color: #fee2e2; color: #991b1b; border-color: #fecaca; }
+
+.modal-content { border-radius: 18px; border: none; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+.modal-header { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: white; border-top-left-radius: 18px; border-top-right-radius: 18px; }
+.modal-header .btn-close { filter: invert(1); }

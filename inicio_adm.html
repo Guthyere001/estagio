@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal do Patrimônio - STDETE Área Administrativa</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="CSS/base.css">
+    <link rel="stylesheet" href="CSS/inicio_adm.css">
+</head>
+<body onload="verificarAutenticacaoAdmin(); carregarTabelaAdmin('com_tombo');">
+
+<header>
+    <div class="container header-container">
+        <div class="logo-box">
+            <div class="inline-style-1"><i class="fa-solid fa-landmark"></i></div>
+            <div class="logo-text">
+                <h1>Portal do Patrimônio</h1>
+                <small>STDETE - Área Administrativa</small>
+            </div>
+        </div>
+        <nav>
+            <a href="#" onclick="Database.logout()" class="nav-sair"><i class="fa-solid fa-right-from-bracket me-1"></i> Sair</a>
+        </nav>
+    </div>
+</header>
+
+<section class="CENTRO">
+    <div class="container">
+        <h2>Acompanhe o patrimônio público</h2>
+        <p>Painel administrativo para controle e gerenciamento de produtos, equipamentos, contratos e informações do patrimônio da STDETE.</p>
+        <div class="search-box">
+            <input id="campoPesquisa" type="search" placeholder="Pesquisar por nome, nº de tombo, local..." onkeyup="filtrarTabelaAdmin()" autocomplete="off">
+            <button type="button" onclick="filtrarTabelaAdmin()"><i class="fa-solid fa-magnifying-glass me-2"></i>Pesquisar</button>
+        </div>
+    </div>
+</section>
+
+<main class="container my-5">
+    <div class="section-header">
+        <div>
+            <small class="text-primary fw-bold">PATRIMÔNIO STDETE</small>
+            <h2 class="fw-bold">Patrimônios Cadastrados</h2>
+        </div>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <div class="btn-group gap-1" role="group">
+                <button type="button" class="btn tab-btn active" id="btnComTombo" onclick="carregarTabelaAdmin('com_tombo')">Com Tombo</button>
+                <button type="button" class="btn tab-btn" id="btnSemTombo" onclick="carregarTabelaAdmin('sem_tombo')">Sem Tombo</button>
+                <button type="button" class="btn tab-btn" id="btnAlocados" onclick="carregarTabelaAdmin('alocado')">Alocados</button>
+            </div>
+            <button type="button" class="btn btn-outline-danger shadow-sm fw-semibold" onclick="exportarPDFAdmin()">
+                <i class="fa-solid fa-file-pdf me-1"></i> Exportar PDF
+            </button>
+            <button type="button" class="btn btn-success shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#modalCadastrarObjeto">
+                <i class="fa-solid fa-plus-circle me-1"></i> Cadastrar Objeto
+            </button>
+        </div>
+    </div>
+
+    <div class="tabela-container">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr id="table-headers"></tr>
+                </thead>
+                <tbody id="listaPatrimoniosAdmin"></tbody>
+            </table>
+        </div>
+        <div id="semResultado" class="text-center py-5" hidden>
+            <i class="fa-solid fa-folder-open text-muted fs-1 mb-2"></i>
+            <h5 class="fw-bold text-dark">Nenhum registro encontrado.</h5>
+        </div>
+        <div class="p-3 bg-light border-top d-flex justify-content-between align-items-center text-muted small">
+            <span id="contador-registros">Exibindo <strong id="total-visivel">0</strong> registro(s).</span>
+            <span><i class="fa-solid fa-rotate text-primary me-1"></i> Sincronizado via LocalStorage</span>
+        </div>
+    </div>
+</main>
+
+<!-- Modal de Cadastro de Objeto -->
+<div class="modal fade" id="modalCadastrarObjeto" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-circle-plus me-2"></i>Cadastrar Novo Objeto</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <form id="formCadastrarObjeto" onsubmit="salvarNovoObjeto(event)">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Tipo de Cadastro:</label>
+                        <select name="tipo" id="cad_tipo" class="form-select" onchange="alternarCamposModalCadastro()" required>
+                            <option value="">Selecione...</option>
+                            <option value="com_tombo">Com Tombo</option>
+                            <option value="sem_tombo">Sem Tombo</option>
+                            <option value="alocado">Alocados</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nome:</label>
+                        <input type="text" name="nome" id="cad_nome" class="form-control" required autocomplete="off">
+                    </div>
+
+                    <!-- Campos dinâmicos: Com Tombo -->
+                    <div id="bloco_com_tombo" style="display: none;">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Nº Tombo:</label>
+                            <input type="text" name="numero_tombo" id="cad_tombo" class="form-control" autocomplete="off">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Data do Tombo:</label>
+                            <input type="date" name="data_aquisicao" id="cad_data_tombo" class="form-control">
+                        </div>
+                    </div>
+
+                    <!-- Campos dinâmicos: Sem Tombo ou Alocados -->
+                    <div id="bloco_quantidade" style="display: none;">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Quantidade:</label>
+                            <input type="number" name="quantidade" id="cad_qtd" class="form-control" min="1" value="1">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Data de Aquisição:</label>
+                            <input type="date" name="data_aquisicao" id="cad_data_aq" class="form-control">
+                        </div>
+                    </div>
+
+                    <!-- Campo específico para Alocados -->
+                    <div class="mb-3" id="bloco_alocado_para" style="display: none;">
+                        <label class="form-label fw-semibold">Alocado Para / Empresa:</label>
+                        <input type="text" name="alocado_para" id="cad_alocado_para" class="form-control" placeholder="Informe o nome da empresa ou setor" autocomplete="off">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Valor Unitário:</label>
+                        <input type="number" step="0.01" name="valor" id="cad_valor" class="form-control" placeholder="Opcional">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Local:</label>
+                        <input type="text" name="local" id="cad_local" class="form-control" required autocomplete="off">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Estado de Conservação:</label>
+                        <select name="estado" id="cad_estado" class="form-select" required>
+                            <option value="Em Funcionamento">Em Funcionamento</option>
+                            <option value="Em Manutenção">Em Manutenção</option>
+                            <option value="Inservível">Inservível</option>
+                            <option value="Novo">Novo</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Observações:</label>
+                        <textarea name="observacao" id="cad_obs" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light d-flex justify-content-between">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success fw-bold"><i class="fa-solid fa-floppy-disk me-1"></i> Salvar Objeto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="js/database.js"></script>
+<script>
+    let tipoAtual = 'com_tombo';
+    let cacheDados = [];
+
+    function verificarAutenticacaoAdmin() {
+        const sessao = Database.obterSessao();
+        if (!sessao || sessao.permissao !== '1') {
+            alert('Acesso restrito a administradores.');
+            window.location.href = 'login.html';
+        }
+    }
+
+    function alternarCamposModalCadastro() {
+        const tipo = document.getElementById('cad_tipo').value;
+        const blocoTombo = document.getElementById('bloco_com_tombo');
+        const blocoQtd = document.getElementById('bloco_quantidade');
+        const blocoAlocado = document.getElementById('bloco_alocado_para');
+
+        blocoTombo.style.display = 'none';
+        blocoQtd.style.display = 'none';
+        blocoAlocado.style.display = 'none';
+
+        if (tipo === 'com_tombo') {
+            blocoTombo.style.display = 'block';
+        } else if (tipo === 'sem_tombo') {
+            blocoQtd.style.display = 'block';
+        } else if (tipo === 'alocado') {
+            blocoQtd.style.display = 'block';
+            blocoAlocado.style.display = 'block';
+        }
+    }
+
+    function salvarNovoObjeto(e) {
+        e.preventDefault();
+        const nome = document.getElementById('cad_nome').value.trim();
+        const local = document.getElementById('cad_local').value.trim();
+        const tipo = document.getElementById('cad_tipo').value;
+
+        if (!nome || !local) {
+            alert('Os campos Nome e Local são obrigatórios e não podem conter apenas espaços.');
+            return;
+        }
+
+        const novoObjeto = {
+            id: Date.now(),
+            tipo: tipo,
+            nome: nome,
+            numero_tombo: document.getElementById('cad_tombo').value.trim() || '',
+            quantidade: parseInt(document.getElementById('cad_qtd').value) || 1,
+            alocado_para: document.getElementById('cad_alocado_para').value.trim() || '',
+            valor: parseFloat(document.getElementById('cad_valor').value) || 0,
+            local: local,
+            estado: document.getElementById('cad_estado').value,
+            data_aquisicao: document.getElementById('cad_data_tombo').value || document.getElementById('cad_data_aq').value || new Date().toISOString().slice(0,10),
+            observacao: document.getElementById('cad_obs').value.trim()
+        };
+
+        const db = Database.getDB();
+        db.objetos.push(novoObjeto);
+        Database.saveDB(db);
+
+        // Fecha o modal e limpa o formulário
+        const modalEl = document.getElementById('modalCadastrarObjeto');
+        const modalInstance = bootstrap.Modal.getInstance(modalEl);
+        if (modalInstance) modalInstance.hide();
+        document.getElementById('formCadastrarObjeto').reset();
+
+        // Recarrega a tabela correspondente
+        carregarTabelaAdmin(tipo);
+        alert('Objeto cadastrado com sucesso!');
+    }
+
+    function carregarTabelaAdmin(tipo) {
+        tipoAtual = tipo;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        if (tipo === 'com_tombo') document.getElementById('btnComTombo').classList.add('active');
+        if (tipo === 'sem_tombo') document.getElementById('btnSemTombo').classList.add('active');
+        if (tipo === 'alocado') document.getElementById('btnAlocados').classList.add('active');
+
+        const db = Database.getDB();
+        cacheDados = db.objetos.filter(o => o.tipo === tipo);
+
+        const headers = document.getElementById('table-headers');
+        if (tipo === 'com_tombo') {
+            headers.innerHTML = `<th>Nº Tombo</th><th>Produto</th><th>Data Aquisição</th><th>Localização</th><th>Estado</th><th>Valor</th>`;
+        } else if (tipo === 'alocado') {
+            headers.innerHTML = `<th>Produto</th><th>Alocado Para</th><th>Data</th><th>Localização</th><th>Estado</th><th>Valor</th>`;
+        } else {
+            headers.innerHTML = `<th>Produto</th><th>Quantidade</th><th>Data Aquisição</th><th>Localização</th><th>Estado</th><th>Valor</th>`;
+        }
+
+        renderizarTabelaAdmin(cacheDados);
+    }
+
+    function renderizarTabelaAdmin(lista) {
+        const tbody = document.getElementById('listaPatrimoniosAdmin');
+        const semResultado = document.getElementById('semResultado');
+        const totalVisivel = document.getElementById('total-visivel');
+        tbody.innerHTML = '';
+
+        if (!lista || lista.length === 0) {
+            semResultado.hidden = false;
+            totalVisivel.innerText = '0';
+            return;
+        }
+
+        semResultado.hidden = true;
+        totalVisivel.innerText = lista.length;
+
+        lista.forEach(item => {
+            const tr = document.createElement('tr');
+            const dataFmt = item.data_aquisicao ? item.data_aquisicao.split('-').reverse().join('/') : '-';
+            const valorFmt = `R$ ${Number(item.valor || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+
+            if (tipoAtual === 'com_tombo') {
+                tr.innerHTML = `
+                    <td><span class="tombo-badge">${item.numero_tombo || 'Sem Tombo'}</span></td>
+                    <td class="fw-bold">${item.nome}</td>
+                    <td>${dataFmt}</td>
+                    <td>${item.local}</td>
+                    <td><span class="status-badge">${item.estado}</span></td>
+                    <td class="text-primary fw-bold">${valorFmt}</td>
+                `;
+            } else if (tipoAtual === 'alocado') {
+                tr.innerHTML = `
+                    <td class="fw-bold">${item.nome}</td>
+                    <td><span class="badge bg-secondary">${item.alocado_para || '-'}</span></td>
+                    <td>${dataFmt}</td>
+                    <td>${item.local}</td>
+                    <td><span class="status-badge">${item.estado}</span></td>
+                    <td class="text-primary fw-bold">${valorFmt}</td>
+                `;
+            } else {
+                tr.innerHTML = `
+                    <td class="fw-bold">${item.nome}</td>
+                    <td><span class="badge bg-light text-secondary border">${item.quantidade || 1}</span></td>
+                    <td>${dataFmt}</td>
+                    <td>${item.local}</td>
+                    <td><span class="status-badge">${item.estado}</span></td>
+                    <td class="text-primary fw-bold">${valorFmt}</td>
+                `;
+            }
+            tbody.appendChild(tr);
+        });
+    }
+
+    function filtrarTabelaAdmin() {
+        const termo = document.getElementById('campoPesquisa').value.toLowerCase().trim();
+        const filtrados = cacheDados.filter(item => 
+            (item.nome && item.nome.toLowerCase().includes(termo)) ||
+            (item.numero_tombo && item.numero_tombo.toLowerCase().includes(termo)) ||
+            (item.local && item.local.toLowerCase().includes(termo)) ||
+            (item.alocado_para && item.alocado_para.toLowerCase().includes(termo))
+        );
+        renderizarTabelaAdmin(filtrados);
+    }
+
+    function exportarPDFAdmin() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('landscape');
+        doc.setFontSize(16);
+        doc.setTextColor(13, 71, 161);
+        doc.text("Relatório Administrativo - Portal do Patrimônio", 14, 15);
+        
+        const linhas = cacheDados.map(i => [
+            i.nome, 
+            i.numero_tombo || i.alocado_para || '-', 
+            i.data_aquisicao ? i.data_aquisicao.split('-').reverse().join('/') : '-', 
+            i.local, 
+            i.estado, 
+            `R$ ${Number(i.valor || 0).toFixed(2)}`
+        ]);
+
+        doc.autoTable({
+            head: [['Produto', 'Identificador', 'Data', 'Local', 'Estado', 'Valor']],
+            body: linhas,
+            startY: 20,
+            theme: 'grid'
+        });
+        doc.save(`patrimonio_${tipoAtual}.pdf`);
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

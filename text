@@ -1,0 +1,29 @@
+====================================================================
+               CREDENCIAIS DE ACESSO DO SISTEMA
+====================================================================
+
+1. ADMINISTRADOR GERAL
+   - Utilizador : admin
+   - Senha      : 123
+   - Permissão  : Nível 1 (Acesso Total)
+   - Destino    : inicio_adm.html (Acesso completo a todas as funções)
+
+2. GESTOR DE OBJETOS ALOCADOS
+   - Utilizador : alocados
+   - Senha      : 123
+   - Permissão  : Nível 2 (Gestor de Alocados)
+   - Destino    : lo.html (Gestão exclusiva de bens alocados)
+
+3. USUÁRIO COMUM
+   - Utilizador : usuario
+   - Senha      : 123
+   - Permissão  : Nível 0 (Leitura / Consulta)
+   - Destino    : inicio_usuario.html (Consulta e visualização)
+
+4. VISITANTE / ACESSO DIRETO
+   - Utilizador : visitante
+   - Senha      : 123
+   - Permissão  : Nível 0 (Leitura / Consulta)
+   - Destino    : inicio_usuario.html (Consulta pública)
+
+====================================================================
