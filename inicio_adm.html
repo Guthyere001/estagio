@@ -56,7 +56,7 @@
             <button type="button" class="btn btn-outline-danger shadow-sm fw-semibold" onclick="exportarPDFAdmin()">
                 <i class="fa-solid fa-file-pdf me-1"></i> Exportar PDF
             </button>
-            <button type="button" class="btn btn-success shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#modalCadastrarObjeto">
+            <button type="button" class="btn btn-success shadow-sm fw-semibold" onclick="abrirModalCadastrar()">
                 <i class="fa-solid fa-plus-circle me-1"></i> Cadastrar Objeto
             </button>
         </div>
@@ -82,15 +82,16 @@
     </div>
 </main>
 
-<!-- Modal de Cadastro de Objeto -->
+<!-- Modal de Cadastro / Edição de Objeto -->
 <div class="modal fade" id="modalCadastrarObjeto" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title fw-bold"><i class="fa-solid fa-circle-plus me-2"></i>Cadastrar Novo Objeto</h5>
+            <div class="modal-header bg-success text-white" id="modalHeaderObjeto">
+                <h5 class="modal-title fw-bold" id="modalTituloObjeto"><i class="fa-solid fa-circle-plus me-2"></i>Cadastrar Novo Objeto</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
-            <form id="formCadastrarObjeto" onsubmit="salvarNovoObjeto(event)">
+            <form id="formCadastrarObjeto" onsubmit="salvarObjetoAdmin(event)">
+                <input type="hidden" id="cad_id">
                 <div class="modal-body p-4">
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Tipo de Cadastro:</label>
@@ -180,6 +181,49 @@
         }
     }
 
+    function abrirModalCadastrar() {
+        document.getElementById('formCadastrarObjeto').reset();
+        document.getElementById('cad_id').value = '';
+        document.getElementById('modalTituloObjeto').innerHTML = '<i class="fa-solid fa-circle-plus me-2"></i>Cadastrar Novo Objeto';
+        document.getElementById('modalHeaderObjeto').className = 'modal-header bg-success text-white';
+        alternarCamposModalCadastro();
+        new bootstrap.Modal(document.getElementById('modalCadastrarObjeto')).show();
+    }
+
+    function abrirModalEditarAdmin(id) {
+        const db = Database.getDB();
+        const obj = db.objetos.find(o => o.id === id);
+        if (!obj) return;
+
+        document.getElementById('cad_id').value = obj.id;
+        document.getElementById('cad_tipo').value = obj.tipo || 'com_tombo';
+        document.getElementById('cad_nome').value = obj.nome || '';
+        document.getElementById('cad_tombo').value = obj.numero_tombo || '';
+        document.getElementById('cad_qtd').value = obj.quantidade || 1;
+        document.getElementById('cad_alocado_para').value = obj.alocado_para || '';
+        document.getElementById('cad_valor').value = obj.valor || '';
+        document.getElementById('cad_local').value = obj.local || '';
+        document.getElementById('cad_estado').value = obj.estado || 'Em Funcionamento';
+        document.getElementById('cad_obs').value = obj.observacao || '';
+        document.getElementById('cad_data_tombo').value = obj.data_aquisicao || '';
+        document.getElementById('cad_data_aq').value = obj.data_aquisicao || '';
+
+        alternarCamposModalCadastro();
+
+        document.getElementById('modalTituloObjeto').innerHTML = '<i class="fa-solid fa-pen-to-square me-2"></i>Editar Objeto';
+        document.getElementById('modalHeaderObjeto').className = 'modal-header bg-primary text-white';
+        new bootstrap.Modal(document.getElementById('modalCadastrarObjeto')).show();
+    }
+
+    function excluirObjetoAdmin(id) {
+        if (!confirm('Tem certeza de que deseja excluir este objeto permanentemente?')) return;
+        const db = Database.getDB();
+        db.objetos = db.objetos.filter(o => o.id !== id);
+        Database.saveDB(db);
+        carregarTabelaAdmin(tipoAtual);
+        alert('Objeto excluído com sucesso!');
+    }
+
     function alternarCamposModalCadastro() {
         const tipo = document.getElementById('cad_tipo').value;
         const blocoTombo = document.getElementById('bloco_com_tombo');
@@ -200,8 +244,9 @@
         }
     }
 
-    function salvarNovoObjeto(e) {
+    function salvarObjetoAdmin(e) {
         e.preventDefault();
+        const idEdicao = document.getElementById('cad_id').value;
         const nome = document.getElementById('cad_nome').value.trim();
         const local = document.getElementById('cad_local').value.trim();
         const tipo = document.getElementById('cad_tipo').value;
@@ -211,8 +256,9 @@
             return;
         }
 
-        const novoObjeto = {
-            id: Date.now(),
+        const db = Database.getDB();
+        const dadosObjeto = {
+            id: idEdicao ? Number(idEdicao) : Date.now(),
             tipo: tipo,
             nome: nome,
             numero_tombo: document.getElementById('cad_tombo').value.trim() || '',
@@ -225,19 +271,24 @@
             observacao: document.getElementById('cad_obs').value.trim()
         };
 
-        const db = Database.getDB();
-        db.objetos.push(novoObjeto);
+        if (idEdicao) {
+            const index = db.objetos.findIndex(o => o.id === Number(idEdicao));
+            if (index !== -1) {
+                db.objetos[index] = dadosObjeto;
+            }
+        } else {
+            db.objetos.push(dadosObjeto);
+        }
+
         Database.saveDB(db);
 
-        // Fecha o modal e limpa o formulário
         const modalEl = document.getElementById('modalCadastrarObjeto');
         const modalInstance = bootstrap.Modal.getInstance(modalEl);
         if (modalInstance) modalInstance.hide();
         document.getElementById('formCadastrarObjeto').reset();
 
-        // Recarrega a tabela correspondente
         carregarTabelaAdmin(tipo);
-        alert('Objeto cadastrado com sucesso!');
+        alert(idEdicao ? 'Objeto atualizado com sucesso!' : 'Objeto cadastrado com sucesso!');
     }
 
     function carregarTabelaAdmin(tipo) {
@@ -252,11 +303,11 @@
 
         const headers = document.getElementById('table-headers');
         if (tipo === 'com_tombo') {
-            headers.innerHTML = `<th>Nº Tombo</th><th>Produto</th><th>Data Aquisição</th><th>Localização</th><th>Estado</th><th>Valor</th>`;
+            headers.innerHTML = `<th>Nº Tombo</th><th>Produto</th><th>Data Aquisição</th><th>Localização</th><th>Estado</th><th>Valor</th><th>Ações</th>`;
         } else if (tipo === 'alocado') {
-            headers.innerHTML = `<th>Produto</th><th>Alocado Para</th><th>Data</th><th>Localização</th><th>Estado</th><th>Valor</th>`;
+            headers.innerHTML = `<th>Produto</th><th>Alocado Para</th><th>Data</th><th>Localização</th><th>Estado</th><th>Valor</th><th>Ações</th>`;
         } else {
-            headers.innerHTML = `<th>Produto</th><th>Quantidade</th><th>Data Aquisição</th><th>Localização</th><th>Estado</th><th>Valor</th>`;
+            headers.innerHTML = `<th>Produto</th><th>Quantidade</th><th>Data Aquisição</th><th>Localização</th><th>Estado</th><th>Valor</th><th>Ações</th>`;
         }
 
         renderizarTabelaAdmin(cacheDados);
@@ -282,34 +333,37 @@
             const dataFmt = item.data_aquisicao ? item.data_aquisicao.split('-').reverse().join('/') : '-';
             const valorFmt = `R$ ${Number(item.valor || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
 
+            let colunasEspecificas = '';
             if (tipoAtual === 'com_tombo') {
-                tr.innerHTML = `
+                colunasEspecificas = `
                     <td><span class="tombo-badge">${item.numero_tombo || 'Sem Tombo'}</span></td>
                     <td class="fw-bold">${item.nome}</td>
                     <td>${dataFmt}</td>
-                    <td>${item.local}</td>
-                    <td><span class="status-badge">${item.estado}</span></td>
-                    <td class="text-primary fw-bold">${valorFmt}</td>
                 `;
             } else if (tipoAtual === 'alocado') {
-                tr.innerHTML = `
+                colunasEspecificas = `
                     <td class="fw-bold">${item.nome}</td>
                     <td><span class="badge bg-secondary">${item.alocado_para || '-'}</span></td>
                     <td>${dataFmt}</td>
-                    <td>${item.local}</td>
-                    <td><span class="status-badge">${item.estado}</span></td>
-                    <td class="text-primary fw-bold">${valorFmt}</td>
                 `;
             } else {
-                tr.innerHTML = `
+                colunasEspecificas = `
                     <td class="fw-bold">${item.nome}</td>
                     <td><span class="badge bg-light text-secondary border">${item.quantidade || 1}</span></td>
                     <td>${dataFmt}</td>
-                    <td>${item.local}</td>
-                    <td><span class="status-badge">${item.estado}</span></td>
-                    <td class="text-primary fw-bold">${valorFmt}</td>
                 `;
             }
+
+            tr.innerHTML = `
+                ${colunasEspecificas}
+                <td>${item.local}</td>
+                <td><span class="status-badge">${item.estado}</span></td>
+                <td class="text-primary fw-bold">${valorFmt}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary me-1" onclick="abrirModalEditarAdmin(${item.id})" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="excluirObjetoAdmin(${item.id})" title="Excluir"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            `;
             tbody.appendChild(tr);
         });
     }
