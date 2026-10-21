@@ -33,7 +33,7 @@
 <section class="CENTRO">
     <div class="container">
         <h2>Gerenciamento de Objetos Alocados</h2>
-        <p>Painel administrativo exclusivo para controle, consulta e cadastro de bens alocados a secretarias e empresas.</p>
+        <p>Painel exclusivo para controle, consulta, edição e cadastro de bens alocados a secretarias e empresas.</p>
         <div class="search-box">
             <input id="campoPesquisaAlocados" type="search" placeholder="Pesquisar por produto, empresa, local..." onkeyup="filtrarAlocados()" autocomplete="off">
             <button type="button" onclick="filtrarAlocados()"><i class="fa-solid fa-magnifying-glass me-2"></i>Pesquisar</button>
@@ -47,7 +47,7 @@
             <h2 class="fw-bold mb-0">Relação de Alocações</h2>
         </div>
         <div class="d-flex gap-2">
-            <button class="btn btn-success fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalCadastrarAlocado">
+            <button class="btn btn-success fw-semibold shadow-sm" onclick="abrirModalCadastrarAlocado()">
                 <i class="fa-solid fa-plus-circle me-1"></i> Cadastrar Alocado
             </button>
             <button class="btn btn-outline-danger fw-semibold shadow-sm" onclick="exportarPDFAlocados()">
@@ -66,6 +66,7 @@
                         <th>Localização</th>
                         <th>Estado</th>
                         <th>Valor</th>
+                        <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody id="tabelaObjetosAlocados"></tbody>
@@ -74,15 +75,16 @@
     </div>
 </main>
 
-<!-- Modal de Cadastro de Objeto Alocado -->
+<!-- Modal de Cadastro / Edição de Objeto Alocado -->
 <div class="modal fade" id="modalCadastrarAlocado" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title fw-bold"><i class="fa-solid fa-circle-plus me-2"></i>Cadastrar Objeto Alocado</h5>
+            <div class="modal-header bg-success text-white" id="modalHeaderAlocado">
+                <h5 class="modal-title fw-bold" id="modalTituloAlocado"><i class="fa-solid fa-circle-plus me-2"></i>Cadastrar Objeto Alocado</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <form id="formAlocado" onsubmit="salvarObjetoAlocado(event)">
+                <input type="hidden" id="aloc_id">
                 <div class="modal-body p-4">
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Nome do Produto:</label>
@@ -106,6 +108,7 @@
                             <option value="Em Funcionamento">Em Funcionamento</option>
                             <option value="Em Manutenção">Em Manutenção</option>
                             <option value="Inservível">Inservível</option>
+                            <option value="Novo">Novo</option>
                         </select>
                     </div>
                 </div>
@@ -130,6 +133,40 @@
         }
     }
 
+    function abrirModalCadastrarAlocado() {
+        document.getElementById('formAlocado').reset();
+        document.getElementById('aloc_id').value = '';
+        document.getElementById('modalTituloAlocado').innerHTML = '<i class="fa-solid fa-circle-plus me-2"></i>Cadastrar Objeto Alocado';
+        document.getElementById('modalHeaderAlocado').className = 'modal-header bg-success text-white';
+        new bootstrap.Modal(document.getElementById('modalCadastrarAlocado')).show();
+    }
+
+    function abrirModalEditarAlocado(id) {
+        const db = Database.getDB();
+        const obj = db.objetos.find(o => o.id === id);
+        if (!obj) return;
+
+        document.getElementById('aloc_id').value = obj.id;
+        document.getElementById('aloc_nome').value = obj.nome || '';
+        document.getElementById('aloc_empresa').value = obj.alocado_para || '';
+        document.getElementById('aloc_local').value = obj.local || '';
+        document.getElementById('aloc_valor').value = obj.valor || '';
+        document.getElementById('aloc_estado').value = obj.estado || 'Em Funcionamento';
+
+        document.getElementById('modalTituloAlocado').innerHTML = '<i class="fa-solid fa-pen-to-square me-2"></i>Editar Objeto Alocado';
+        document.getElementById('modalHeaderAlocado').className = 'modal-header bg-primary text-white';
+        new bootstrap.Modal(document.getElementById('modalCadastrarAlocado')).show();
+    }
+
+    function excluirObjetoAlocado(id) {
+        if (!confirm('Tem certeza de que deseja excluir este objeto alocado?')) return;
+        const db = Database.getDB();
+        db.objetos = db.objetos.filter(o => o.id !== id);
+        Database.saveDB(db);
+        carregarObjetosAlocados();
+        alert('Objeto alocado excluído com sucesso!');
+    }
+
     function carregarObjetosAlocados() {
         const db = Database.getDB();
         cacheAlocados = db.objetos.filter(o => o.tipo === 'alocado');
@@ -141,7 +178,7 @@
         tbody.innerHTML = "";
 
         if (lista.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">Nenhum objeto alocado encontrado.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">Nenhum objeto alocado encontrado.</td></tr>`;
             return;
         }
 
@@ -153,6 +190,10 @@
                     <td>${obj.local}</td>
                     <td><span class="status-badge">${obj.estado}</span></td>
                     <td class="text-primary fw-bold">R$ ${Number(obj.valor || 0).toFixed(2)}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1" onclick="abrirModalEditarAlocado(${obj.id})" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="excluirObjetoAlocado(${obj.id})" title="Excluir"><i class="fa-solid fa-trash"></i></button>
+                    </td>
                 </tr>`;
         });
     }
@@ -169,6 +210,7 @@
 
     function salvarObjetoAlocado(e) {
         e.preventDefault();
+        const idEdicao = document.getElementById('aloc_id').value;
         const nome = document.getElementById('aloc_nome').value.trim();
         const empresa = document.getElementById('aloc_empresa').value.trim();
         const local = document.getElementById('aloc_local').value.trim();
@@ -178,8 +220,9 @@
             return;
         }
 
-        const novoAlocado = {
-            id: Date.now(),
+        const db = Database.getDB();
+        const dadosAlocado = {
+            id: idEdicao ? Number(idEdicao) : Date.now(),
             tipo: 'alocado',
             nome: nome,
             alocado_para: empresa,
@@ -187,17 +230,24 @@
             valor: parseFloat(document.getElementById('aloc_valor').value) || 0,
             estado: document.getElementById('aloc_estado').value,
             data_aquisicao: new Date().toISOString().slice(0, 10),
-            observacao: 'Cadastrado via painel de alocados'
+            observacao: 'Gerenciado via painel de alocados'
         };
 
-        const db = Database.getDB();
-        db.objetos.push(novoAlocado);
+        if (idEdicao) {
+            const index = db.objetos.findIndex(o => o.id === Number(idEdicao));
+            if (index !== -1) {
+                db.objetos[index] = dadosAlocado;
+            }
+        } else {
+            db.objetos.push(dadosAlocado);
+        }
+
         Database.saveDB(db);
 
         bootstrap.Modal.getInstance(document.getElementById('modalCadastrarAlocado')).hide();
         document.getElementById('formAlocado').reset();
         carregarObjetosAlocados();
-        alert('Objeto alocado cadastrado com sucesso!');
+        alert(idEdicao ? 'Objeto alocado atualizado com sucesso!' : 'Objeto alocado cadastrado com sucesso!');
     }
 
     function exportarPDFAlocados() {
